@@ -1,0 +1,61 @@
+{
+  "name": "alpaxo/finite3",
+  "description": "A simple PHP7.2+ Finite State Machine",
+  "keywords": [
+    "statemachine",
+    "workflow",
+    "state",
+    "transition",
+    "symfony",
+    "bundle"
+  ],
+  "homepage": "https://github.com/yohang/Finite",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Yohan Giarelli",
+      "email": "yohan@giarel.li",
+      "homepage": "http://yohan.giarel.li"
+    },
+    {
+      "name": "Finite contributors",
+      "homepage": "https://github.com/yohang/Finite/graphs/contributors"
+    }
+  ],
+  "require": {
+    "php": "^7.2.5",
+    "symfony/options-resolver": "^5.0",
+    "symfony/event-dispatcher": "^4.4|^5.0",
+    "symfony/property-access": "^5.0"
+  },
+  "require-dev": {
+    "pimple/pimple": "^3.3",
+    "symfony/security": "^4.4|^5.0",
+    "symfony/dependency-injection": "^5.0",
+    "symfony/framework-bundle": "^4.4|^5.0",
+    "twig/twig": "^3.0",
+    "phpunit/phpunit": "^8.5"
+  },
+  "suggest": {
+    "pimple/pimple": "Needed for use with PimpleFactory",
+    "symfony/security": "Needed for using SecurityAwareStateMachine",
+    "symfony/yaml": "Yaml allows you to define your State graph in YAML"
+  },
+  "autoload": {
+    "psr-0": {
+      "Finite": "src/"
+    }
+  },
+  "config": {
+    "bin-dir": "bin",
+    "platform": {
+      "php": "7.2.5"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "3.0.x-dev"
+    }
+  }
+}

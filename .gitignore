@@ -1,0 +1,11 @@
+.idea
+.phpunit.result.cache
+vendor
+build
+bin
+composer.phar
+composer.lock
+cache.properties
+coverage.clover
+docs/_build
+Makefile

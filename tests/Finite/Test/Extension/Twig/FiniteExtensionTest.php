@@ -1,0 +1,126 @@
+<?php
+
+namespace Finite\Test\Extension\Twig;
+
+use Finite\Context;
+use Finite\Extension\Twig\FiniteExtension;
+use Finite\Factory\PimpleFactory;
+use Finite\State\Accessor\StateAccessorInterface;
+use Finite\State\State;
+use Finite\StatefulInterface;
+use Finite\StateMachine\StateMachine;
+use PHPUnit\Framework\TestCase;
+use Pimple\Container;
+use Twig\Environment;
+use Twig\Loader\ArrayLoader;
+
+/**
+ * @author Yohan Giarelli <yohan@frequence-web.fr>
+ */
+class FiniteExtensionTest extends TestCase
+{
+    /**
+     * @var \Twig\Environment
+     */
+    protected $env;
+
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
+    protected $context;
+
+    protected $accessor;
+
+    public function setUp(): void
+    {
+        $this->accessor = $accessor = $this->createMock(StateAccessorInterface::class);
+        $this->env = new Environment(
+            new ArrayLoader(
+                [
+                    'state' => '{{ finite_state(object) }}',
+                    'transitions' => '{% for transition in finite_transitions(object) %}{{ transition }}{% endfor %}',
+                    'properties' => '{% for property, val in finite_properties(object) %}{{ property }}{% endfor %}',
+                    'has' => '{{ finite_has(object, property) ? "yes" : "no" }}',
+                    'can' => '{{ finite_can(object, transition, "foo") ? "yes" : "no" }}',
+                ]
+            )
+        );
+
+        $container = new Container(
+            [
+                'state_machine' => static function () use ($accessor) {
+                    $sm = new StateMachine(null, null, $accessor);
+                    $sm->addState(new State('s1', State::TYPE_INITIAL, [], ['foo' => true, 'bar' => false]));
+                    $sm->addTransition('t12', 's1', 's2');
+                    $sm->addTransition('t23', 's2', 's3');
+
+                    return $sm;
+                },
+            ]
+        );
+
+        $this->context = new Context(new PimpleFactory($container, 'state_machine'));
+        $this->env->addExtension(new FiniteExtension($this->context));
+    }
+
+    /**
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
+     */
+    public function testState(): void
+    {
+        $this->accessor->expects($this->once())->method('getState')->willReturn('s1');
+        $this->assertSame('s1', $this->env->render('state', ['object' => $this->getObjectMock()]));
+    }
+
+    /**
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
+     */
+    public function testTransitions(): void
+    {
+        $this->accessor->expects($this->once())->method('getState')->willReturn('s1');
+        $this->assertSame('t12', $this->env->render('transitions', ['object' => $this->getObjectMock()]));
+    }
+
+    /**
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
+     */
+    public function testProperties(): void
+    {
+        $this->accessor->expects($this->once())->method('getState')->willReturn('s1');
+        $this->assertSame('foobar', $this->env->render('properties', ['object' => $this->getObjectMock()]));
+    }
+
+    /**
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
+     */
+    public function testHas(): void
+    {
+        $this->accessor->expects($this->exactly(2))->method('getState')->willReturn('s1');
+        $this->assertSame('yes', $this->env->render('has', ['object' => $this->getObjectMock(), 'property' => 'foo']));
+        $this->assertSame('no', $this->env->render('has', ['object' => $this->getObjectMock(), 'property' => 'baz']));
+    }
+
+    /**
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
+     */
+    public function testCan(): void
+    {
+        $this->assertSame('yes', $this->env->render('can', ['object' => $this->getObjectMock(), 'transition' => 't12']));
+        $this->assertSame('no', $this->env->render('can', ['object' => $this->getObjectMock(), 'transition' => 't23']));
+    }
+
+    public function getObjectMock()
+    {
+        return $this->createMock(StatefulInterface::class);
+    }
+}
