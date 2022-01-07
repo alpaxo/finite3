@@ -24,7 +24,7 @@
     }
   ],
   "require": {
-    "php": "^7.2.5",
+    "php": "^7.2.5|^8.0",
     "symfony/options-resolver": "^5.0",
     "symfony/event-dispatcher": "^4.4|^5.0",
     "symfony/property-access": "^5.0"
@@ -50,7 +50,7 @@
   "config": {
     "bin-dir": "bin",
     "platform": {
-      "php": "7.2.5"
+      "php": "7.4.0"
     }
   },
   "extra": {
