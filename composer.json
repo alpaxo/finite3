@@ -1,6 +1,6 @@
 {
   "name": "alpaxo/finite3",
-  "description": "A simple PHP7.2+ Finite State Machine",
+  "description": "A simple PHP7.4+ Finite State Machine",
   "keywords": [
     "statemachine",
     "workflow",
@@ -36,6 +36,9 @@
     "symfony/framework-bundle": "^4.4|^5.0",
     "twig/twig": "^3.0",
     "phpunit/phpunit": "^8.5"
+  },
+  "conflict": {
+    "symfony/symfony": "^6.0"
   },
   "suggest": {
     "pimple/pimple": "Needed for use with PimpleFactory",
