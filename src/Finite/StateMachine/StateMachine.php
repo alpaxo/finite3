@@ -170,7 +170,7 @@ class StateMachine implements StateMachineInterface
      * {@inheritdoc}
      * @throws \Finite\Exception\TransitionException|\Finite\Exception\StateException
      */
-    public function addTransition(TransitionInterface|string $transition, string $initialState = null, string $finalState = null): void
+    public function addTransition(TransitionInterface|string $transition, mixed $initialState = null, mixed $finalState = null): void
     {
         if ((null === $initialState || null === $finalState) && !$transition instanceof TransitionInterface) {
             throw new InvalidArgumentException(
@@ -232,10 +232,10 @@ class StateMachine implements StateMachineInterface
      * {@inheritdoc}
      * @throws \Finite\Exception\StateException
      */
-    public function getState($name): StateInterface
+    public function getState(string|\Stringable|int $name): StateInterface
     {
         $name = (string)$name;
-        
+
         if (!isset($this->states[$name])) {
             throw new StateException(
                 sprintf(

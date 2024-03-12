@@ -43,6 +43,11 @@ interface StateInterface extends PropertiesAwareInterface
     public function getType(): string;
 
     /**
+     * Add transition to the state
+     */
+    public function addTransition(TransitionInterface|string $transition): void;
+
+    /**
      * Returns the available transitions.
      */
     public function getTransitions(): array;

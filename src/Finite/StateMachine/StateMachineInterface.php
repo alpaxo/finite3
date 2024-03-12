@@ -39,7 +39,7 @@ interface StateMachineInterface
     /**
      * @throws \InvalidArgumentException
      */
-    public function addTransition(TransitionInterface|string $transition, string $initialState = null, string $finalState = null);
+    public function addTransition(TransitionInterface|string $transition, mixed $initialState = null, mixed $finalState = null);
 
     /**
      * Returns a transition by its name.
@@ -51,7 +51,7 @@ interface StateMachineInterface
     /**
      * @throws \Finite\Exception\TransitionException
      */
-    public function getState(string $name): StateInterface;
+    public function getState(string|\Stringable|int $name): StateInterface;
 
     /**
      * Returns an array containing all the transitions names.

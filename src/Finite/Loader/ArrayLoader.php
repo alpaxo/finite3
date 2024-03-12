@@ -87,7 +87,14 @@ class ArrayLoader implements LoaderInterface
     private function loadStates(StateMachineInterface $stateMachine): void
     {
         $resolver = new OptionsResolver();
-        $resolver->setDefaults(['type' => StateInterface::TYPE_NORMAL, 'properties' => []]);
+
+        $resolver->setDefaults(
+            [
+                'type' => StateInterface::TYPE_NORMAL,
+                'properties' => [],
+            ]
+        );
+
         $resolver->setAllowedValues(
             'type',
             [
@@ -106,10 +113,24 @@ class ArrayLoader implements LoaderInterface
     private function loadTransitions(StateMachineInterface $stateMachine): void
     {
         $resolver = new OptionsResolver();
-        $resolver->setRequired(['from', 'to']);
-        $resolver->setDefaults(['guard' => null, 'configure_properties' => null, 'properties' => []]);
+        $resolver->setRequired(
+            [
+                'from',
+                'to',
+            ]
+        );
+        $resolver->setDefaults(
+            [
+                'guard' => null,
+                'configure_properties' => null,
+                'properties' => [],
+            ]
+        );
 
-        $resolver->setAllowedTypes('configure_properties', ['null', 'callable']);
+        $resolver->setAllowedTypes('configure_properties', [
+            'null',
+            'callable',
+        ]);
 
         $resolver->setNormalizer(
             'from',
@@ -209,6 +230,7 @@ class ArrayLoader implements LoaderInterface
         $toArrayNormalizer = static function (Options $options, $value) {
             return (array)$value;
         };
+
         $resolver->setNormalizer('on', $toArrayNormalizer);
         $resolver->setNormalizer('from', $toArrayNormalizer);
         $resolver->setNormalizer('to', $toArrayNormalizer);

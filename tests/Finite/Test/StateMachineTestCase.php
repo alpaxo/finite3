@@ -27,6 +27,7 @@ class StateMachineTestCase extends TestCase
     public function setUp(): void
     {
         $this->accessor = $this->createMock(StateAccessorInterface::class);
+
         $this->dispatcher = $this->getMockBuilder(EventDispatcher::class)
             ->disableOriginalConstructor()
             ->getMock()

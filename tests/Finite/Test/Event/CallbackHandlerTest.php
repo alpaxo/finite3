@@ -131,7 +131,7 @@ class CallbackHandlerTest extends TestCase
         ;
 
         $this->dispatcher
-            ->expects($this->at(0))
+            ->expects($this->once())
             ->method('addListener')
             ->with(
                 FiniteEvents::PRE_TRANSITION,

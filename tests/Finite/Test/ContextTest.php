@@ -98,7 +98,7 @@ class ContextTest extends TestCase
         $factory = $this->createMock(FactoryInterface::class);
         $sm = $this->createMock(StateMachineInterface::class);
 
-        $factory->expects($this->once())->method('get')->with(...[$object, 'foo'])->willReturn($sm);
+        $factory->expects($this->once())->method('get')->with($object, 'foo')->willReturn($sm);
 
         $context = new Context($factory);
         $this->assertSame($sm, $context->getStateMachine($object, 'foo'));

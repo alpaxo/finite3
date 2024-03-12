@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Finite\Test\Event\Callback;
 
-use Finite\Event\Callback\Callback;
 use Finite\Event\Callback\CallbackBuilder;
 use Finite\Event\Callback\CallbackSpecification;
 use Finite\StateMachine\StateMachine;

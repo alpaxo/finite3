@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\State\Accessor;
 
 use Finite\Exception\NoSuchPropertyException;
@@ -46,7 +48,7 @@ class PropertyPathStateAccessor implements StateAccessorInterface
     /**
      * {@inheritdoc}
      */
-    public function setState(object $object, string $value): void
+    public function setState(object $object, string|int $value): void
     {
         try {
             $this->propertyAccessor->setValue($object, $this->propertyPath, $value);

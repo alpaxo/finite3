@@ -23,9 +23,9 @@ class State implements StateInterface
 
     protected array $properties;
 
-    public function __construct($name, $type = self::TYPE_NORMAL, array $transitions = [], array $properties = [])
+    public function __construct(string|int $name, string $type = self::TYPE_NORMAL, array $transitions = [], array $properties = [])
     {
-        $this->name = $name;
+        $this->name = (string)$name;
         $this->type = $type;
         $this->transitions = $transitions;
         $this->properties = $properties;
@@ -139,19 +139,13 @@ class State implements StateInterface
         return $this->name;
     }
 
-    /**
-     * @param array $properties
-     */
     public function setProperties(array $properties): void
     {
         $this->properties = $properties;
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
+    public function __toString(): string
     {
-        return $this->getName();
+        return (string)$this->getName();
     }
 }

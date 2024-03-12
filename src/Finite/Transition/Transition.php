@@ -34,8 +34,8 @@ class Transition implements PropertiesAwareTransitionInterface
 
     public function __construct(
         string $name,
-        array|string $initialStates,
-        string $state,
+        array|string|int $initialStates,
+        string|int $state,
         Closure|array|null $guard = null,
         OptionsResolver $propertiesOptionsResolver = null
     ) {
@@ -44,19 +44,19 @@ class Transition implements PropertiesAwareTransitionInterface
         }
 
         $this->name = $name;
-        $this->state = $state;
-        $this->initialStates = (array)$initialStates;
+        $this->state = (string)$state;
+        $this->initialStates = array_map('strval', (array)$initialStates);
         $this->guard = $guard;
         $this->propertiesOptionsResolver = $propertiesOptionsResolver ?: new OptionsResolver();
     }
 
-    public function addInitialState(StateInterface|string $state): void
+    public function addInitialState(StateInterface|string|int $state): void
     {
         if ($state instanceof StateInterface) {
             $state = $state->getName();
         }
 
-        $this->initialStates[] = $state;
+        $this->initialStates[] = (string)$state;
     }
 
     /**
@@ -147,7 +147,7 @@ class Transition implements PropertiesAwareTransitionInterface
         $missingOptions = $this->propertiesOptionsResolver->getMissingOptions();
 
         if (0 === count($missingOptions)) {
-            return $this->propertiesOptionsResolver->resolve([]);
+            return $this->propertiesOptionsResolver->resolve();
         }
 
         $options = array_combine($missingOptions, array_fill(0, count($missingOptions), null));
@@ -158,10 +158,7 @@ class Transition implements PropertiesAwareTransitionInterface
         );
     }
 
-    /**
-     * @return string
-     */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getName();
     }
