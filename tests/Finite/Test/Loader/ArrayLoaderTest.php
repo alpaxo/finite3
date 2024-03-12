@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Test\Loader;
 
 use Finite\Event\Callback\Callback;
@@ -8,6 +10,7 @@ use Finite\Loader\ArrayLoader;
 use Finite\State\Accessor\PropertyPathStateAccessor;
 use Finite\StatefulInterface;
 use Finite\StateMachine\StateMachine;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -16,15 +19,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class ArrayLoaderTest extends TestCase
 {
-    /**
-     * @var ArrayLoader
-     */
-    protected $object;
+    protected ArrayLoader $object;
 
-    /**
-     * @var \PHPUnit\Framework\MockObject\MockObject
-     */
-    protected $callbackHandler;
+    protected MockObject $callbackHandler;
 
     protected function setUp(): void
     {
@@ -37,17 +34,37 @@ class ArrayLoaderTest extends TestCase
             [
                 'class' => 'Stateful1',
                 'states' => [
-                    'start' => ['type' => 'initial', 'properties' => ['foo' => true, 'bar' => false]],
-                    'middle' => ['type' => 'normal', 'properties' => []],
-                    'end' => ['type' => 'final', 'properties' => []],
+                    'start' => [
+                        'type' => 'initial',
+                        'properties' => [
+                            'foo' => true,
+                            'bar' => false,
+                        ],
+                    ],
+                    'middle' => [
+                        'type' => 'normal',
+                        'properties' => [
+
+                        ],
+                    ],
+                    'end' => [
+                        'type' => 'final',
+                        'properties' => [
+
+                        ],
+                    ],
                 ],
                 'transitions' => [
                     'middleize' => [
-                        'from' => ['start'],
+                        'from' => [
+                            'start',
+                        ],
                         'to' => 'middle',
                     ],
                     'finish' => [
-                        'from' => ['middle'],
+                        'from' => [
+                            'middle',
+                        ],
                         'to' => 'end',
                     ],
                 ],
@@ -59,10 +76,12 @@ class ArrayLoaderTest extends TestCase
     public function testLoad(): void
     {
         $sm = $this->createMock(StateMachine::class);
+
         $sm->expects($this->once())->method('setStateAccessor');
         $sm->expects($this->once())->method('setGraph');
         $sm->expects($this->exactly(3))->method('addState');
         $sm->expects($this->exactly(2))->method('addTransition');
+
         $this->object->load($sm);
     }
 
@@ -71,9 +90,17 @@ class ArrayLoaderTest extends TestCase
         $sm = $this->createMock(StateMachine::class);
 
         $graphName = 'foobar';
-        $loader = new ArrayLoader(['class' => 'Stateful1', 'graph' => $graphName], $this->callbackHandler);
+        $loader = new ArrayLoader(
+            [
+                'class' => 'Stateful1',
+                'graph' => $graphName,
+            ], $this->callbackHandler
+        );
 
-        $sm->expects($this->once())->method('setGraph')->with(...[$graphName]);
+        $sm->expects($this->once())
+            ->method('setGraph')
+            ->with($graphName)
+        ;
 
         $loader->load($sm);
     }
@@ -86,9 +113,17 @@ class ArrayLoaderTest extends TestCase
             [
                 'class' => 'Stateful1',
                 'states' => [
-                    'start' => ['type' => 'initial', 'properties' => ['foo' => true, 'bar' => false]],
+                    'start' => [
+                        'type' => 'initial',
+                        'properties' => [
+                            'foo' => true,
+                            'bar' => false,
+                        ],
+                    ],
                     'middle' => [],
-                    'end' => ['type' => 'final'],
+                    'end' => [
+                        'type' => 'final',
+                    ],
                 ],
                 'transitions' => [
                     'middleize' => [
@@ -96,7 +131,9 @@ class ArrayLoaderTest extends TestCase
                         'to' => 'middle',
                     ],
                     'finish' => [
-                        'from' => ['middle'],
+                        'from' => [
+                            'middle',
+                        ],
                         'to' => 'end',
                     ],
                 ],
@@ -104,14 +141,21 @@ class ArrayLoaderTest extends TestCase
             $this->callbackHandler
         );
 
-        $sm->expects($this->exactly(3))->method('addState');
-        $sm->expects($this->exactly(2))->method('addTransition');
+        $sm->expects($this->exactly(3))
+            ->method('addState')
+        ;
+
+        $sm->expects($this->exactly(2))
+            ->method('addTransition')
+        ;
+
         $this->object->load($sm);
     }
 
     public function testLoadCallbacks(): void
     {
         $sm = $this->createMock(StateMachine::class);
+
         $allTimes = static function () {
         };
         $beforeMiddleize = static function () {
@@ -123,21 +167,42 @@ class ArrayLoaderTest extends TestCase
             [
                 'class' => 'Stateful1',
                 'states' => [
-                    'start' => ['type' => 'initial'],
+                    'start' => [
+                        'type' => 'initial',
+                    ],
                     'middle' => [],
-                    'end' => ['type' => 'final'],
+                    'end' => [
+                        'type' => 'final',
+                    ],
                 ],
                 'transitions' => [
-                    'middleize' => ['from' => 'start', 'to' => 'middle'],
-                    'finish' => ['from' => ['middle'], 'to' => 'end'],
+                    'middleize' => [
+                        'from' => 'start',
+                        'to' => 'middle',
+                    ],
+                    'finish' => [
+                        'from' => [
+                            'middle',
+                        ],
+                        'to' => 'end',
+                    ],
                 ],
                 'callbacks' => [
                     'before' => [
-                        ['on' => 'middleize', 'do' => $beforeMiddleize],
-                        ['from' => 'start', 'to' => '-middle', 'do' => $fromStartToOtherThanMiddle],
+                        [
+                            'on' => 'middleize',
+                            'do' => $beforeMiddleize,
+                        ],
+                        [
+                            'from' => 'start',
+                            'to' => '-middle',
+                            'do' => $fromStartToOtherThanMiddle,
+                        ],
                     ],
                     'after' => [
-                        ['do' => $allTimes],
+                        [
+                            'do' => $allTimes,
+                        ],
                     ],
                 ],
             ],
@@ -147,19 +212,19 @@ class ArrayLoaderTest extends TestCase
         $this->callbackHandler
             ->expects($this->at(0))
             ->method('addBefore')
-            ->with(...[$this->isInstanceOf(Callback::class)])
+            ->with($this->isInstanceOf(Callback::class))
         ;
 
         $this->callbackHandler
             ->expects($this->at(1))
             ->method('addBefore')
-            ->with(...[$this->isInstanceOf(Callback::class)])
+            ->with($this->isInstanceOf(Callback::class))
         ;
 
         $this->callbackHandler
             ->expects($this->at(2))
             ->method('addAfter')
-            ->with(...[$this->isInstanceOf(Callback::class)])
+            ->with($this->isInstanceOf(Callback::class))
         ;
 
         $this->object->load($sm);
@@ -173,14 +238,26 @@ class ArrayLoaderTest extends TestCase
             [
                 'class' => 'Stateful1',
                 'states' => [
-                    'start' => ['type' => 'initial', 'properties' => ['foo' => true, 'bar' => false]],
-                    'end' => ['type' => 'final'],
+                    'start' => [
+                        'type' => 'initial',
+                        'properties' => [
+                            'foo' => true,
+                            'bar' => false,
+                        ],
+                    ],
+                    'end' => [
+                        'type' => 'final',
+                    ],
                 ],
                 'transitions' => [
                     'finish' => [
-                        'from' => ['middle'],
+                        'from' => [
+                            'middle',
+                        ],
                         'to' => 'end',
-                        'properties' => ['default' => 'default'],
+                        'properties' => [
+                            'default' => 'default',
+                        ],
                         'configure_properties' => static function (OptionsResolver $optionsResolver) {
                             $optionsResolver->setRequired('required');
                         },
@@ -231,7 +308,13 @@ class ArrayLoaderTest extends TestCase
         $this->assertTrue($this->object->supports($object));
         $this->assertFalse($this->object->supports($object2));
 
-        $alternativeLoader = new ArrayLoader(['class' => 'Stateful1', 'graph' => 'foobar']);
+        $alternativeLoader = new ArrayLoader(
+            [
+                'class' => 'Stateful1',
+                'graph' => 'foobar',
+            ]
+        );
+
         $this->assertTrue($alternativeLoader->supports($object, 'foobar'));
         $this->assertFalse($alternativeLoader->supports($object));
     }

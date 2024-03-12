@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Test;
 
 use Finite\State\Accessor\StateAccessorInterface;
 use Finite\State\State;
+use Finite\State\StateInterface;
 use Finite\StatefulInterface;
 use Finite\StateMachine\StateMachine;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
@@ -14,21 +18,16 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  */
 class StateMachineTestCase extends TestCase
 {
-    /**
-     * @var StateMachine
-     */
-    protected $object;
+    protected StateMachine $object;
 
-    /**
-     * @var \PHPUnit\Framework\MockObject\MockObject
-     */
-    protected $dispatcher;
+    protected EventDispatcher $dispatcher;
 
-    protected $accessor;
+    protected MockObject $accessor;
 
     public function setUp(): void
     {
         $this->accessor = $this->createMock(StateAccessorInterface::class);
+
         $this->dispatcher = $this->getMockBuilder(EventDispatcher::class)
             ->disableOriginalConstructor()
             ->getMock()
@@ -40,11 +39,11 @@ class StateMachineTestCase extends TestCase
     public function statesProvider(): array
     {
         return [
-            [new State('s1', State::TYPE_INITIAL)],
-            [new State('s2', State::TYPE_NORMAL, [], ['visible' => true])],
+            [new State('s1', StateInterface::TYPE_INITIAL)],
+            [new State('s2', StateInterface::TYPE_NORMAL, [], ['visible' => true])],
             ['s3'],
-            [new State('s4', State::TYPE_NORMAL, [], ['visible' => true])],
-            [new State('s5', State::TYPE_FINAL, [], ['visible' => false])],
+            [new State('s4', StateInterface::TYPE_NORMAL, [], ['visible' => true])],
+            [new State('s5', StateInterface::TYPE_FINAL, [], ['visible' => false])],
         ];
     }
 
@@ -65,6 +64,10 @@ class StateMachineTestCase extends TestCase
         }
     }
 
+    /**
+     * @throws \Finite\Exception\TransitionException
+     * @throws \Finite\Exception\StateException
+     */
     protected function addTransitions(): void
     {
         foreach ($this->transitionsProvider() as $transitions) {
@@ -73,7 +76,10 @@ class StateMachineTestCase extends TestCase
     }
 
     /**
+     * @throws \Finite\Exception\NoSuchPropertyException
      * @throws \Finite\Exception\ObjectException
+     * @throws \Finite\Exception\StateException
+     * @throws \Finite\Exception\TransitionException
      */
     protected function initialize(): void
     {
@@ -83,10 +89,14 @@ class StateMachineTestCase extends TestCase
         $this->object->initialize();
     }
 
-    protected function getStatefulObjectMock()
+    protected function getStatefulObjectMock(): MockObject
     {
         $mock = $this->createMock(StatefulInterface::class);
-        $this->accessor->expects($this->at(0))->method('getState')->willReturn('s2');
+
+        $this->accessor->expects($this->at(0))
+            ->method('getState')
+            ->willReturn('s2')
+        ;
 
         return $mock;
     }

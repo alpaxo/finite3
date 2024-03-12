@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Test\Event;
 
 use Finite\Event\Callback\Callback;
@@ -11,6 +13,7 @@ use Finite\State\StateInterface;
 use Finite\StatefulInterface;
 use Finite\StateMachine\StateMachineInterface;
 use Finite\Transition\TransitionInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
@@ -19,25 +22,18 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  */
 class CallbackHandlerTest extends TestCase
 {
-    /**
-     * @var CallbackHandler
-     */
-    protected $object;
+    protected CallbackHandler $object;
 
-    /**
-     * @var \PHPUnit\Framework\MockObject\MockObject
-     */
-    protected $dispatcher;
+    protected MockObject $dispatcher;
 
-    /**
-     * @var \PHPUnit\Framework\MockObject\MockObject
-     */
-    protected $statemachine;
+    protected MockObject $statemachine;
 
     public function setUp(): void
     {
         $this->dispatcher = $this->createMock(EventDispatcher::class);
+
         $this->statemachine = $this->createMock(StateMachineInterface::class);
+
         $this->object = new CallbackHandler($this->dispatcher);
     }
 
@@ -46,14 +42,16 @@ class CallbackHandlerTest extends TestCase
         $this->dispatcher
             ->expects($this->once())
             ->method('addListener')
-            ->with(...[FiniteEvents::PRE_TRANSITION, $this->isInstanceOf(Callback::class)])
+            ->with(FiniteEvents::PRE_TRANSITION, $this->isInstanceOf(Callback::class))
         ;
 
         $this->object->addBefore(
-            CallbackBuilder::create($this->statemachine)->setCallable(
-                static function () {
-                }
-            )->getCallback()
+            CallbackBuilder::create($this->statemachine)
+                ->setCallable(
+                    static function () {
+                    }
+                )
+                ->getCallback()
         );
     }
 
@@ -62,7 +60,7 @@ class CallbackHandlerTest extends TestCase
         $this->dispatcher
             ->expects($this->once())
             ->method('addListener')
-            ->with(...[FiniteEvents::PRE_TRANSITION, $this->isInstanceOf(Callback::class)])
+            ->with(FiniteEvents::PRE_TRANSITION, $this->isInstanceOf(Callback::class))
         ;
 
         $this->object->addBefore(
@@ -79,52 +77,86 @@ class CallbackHandlerTest extends TestCase
     public function testItAttachsPreTransitionWithToSpec(): void
     {
         $transitionOk = $this->createMock(TransitionInterface::class);
+
         $transitionNotOk = $this->createMock(TransitionInterface::class);
+
         $state = $this->createMock(StateInterface::class);
-        $e1 = $this->getMockBuilder(TransitionEvent::class)->disableOriginalConstructor()->getMock();
-        $e2 = $this->getMockBuilder(TransitionEvent::class)->disableOriginalConstructor()->getMock();
+
+        $e1 = $this->getMockBuilder(TransitionEvent::class)
+            ->disableOriginalConstructor()
+            ->getMock()
+        ;
+
+        $e2 = $this->getMockBuilder(TransitionEvent::class)
+            ->disableOriginalConstructor()
+            ->getMock()
+        ;
+
         $stateful = $this->createMock(StatefulInterface::class);
 
-        $this->statemachine->method('getObject')->willReturn($stateful);
-        $e1->method('getStateMachine')->willReturn($this->statemachine);
-        $e2->method('getStateMachine')->willReturn($this->statemachine);
-        $e1->method('getInitialState')->willReturn($state);
-        $e2->method('getInitialState')->willReturn($state);
-        $transitionOk->method('getState')->willReturn('foobar');
-        $transitionNotOk->method('getState')->willReturn('bazqux');
-        $e1->method('getTransition')->willReturn($transitionOk);
-        $e2->method('getTransition')->willReturn($transitionNotOk);
+        $this->statemachine->method('getObject')
+            ->willReturn($stateful)
+        ;
+
+        $e1->method('getStateMachine')
+            ->willReturn($this->statemachine)
+        ;
+
+        $e2->method('getStateMachine')
+            ->willReturn($this->statemachine)
+        ;
+
+        $e1->method('getInitialState')
+            ->willReturn($state)
+        ;
+
+        $e2->method('getInitialState')
+            ->willReturn($state)
+        ;
+
+        $transitionOk->method('getState')
+            ->willReturn('foobar')
+        ;
+
+        $transitionNotOk->method('getState')
+            ->willReturn('bazqux')
+        ;
+
+        $e1->method('getTransition')
+            ->willReturn($transitionOk)
+        ;
+
+        $e2->method('getTransition')
+            ->willReturn($transitionNotOk)
+        ;
 
         $this->dispatcher
-            ->expects($this->at(0))
+            ->expects($this->once())
             ->method('addListener')
             ->with(
-                ...[
-                       FiniteEvents::PRE_TRANSITION,
-                       $this->logicalAnd(
-                           $this->isInstanceOf(Callback::class),
-                           $this->callback(
-                               static function (Callback $c) use ($e1, $e2) {
-                                   $c($e1);
-                                   $c($e2);
+                FiniteEvents::PRE_TRANSITION,
+                $this->logicalAnd(
+                    $this->isInstanceOf(Callback::class),
+                    $this->callback(
+                        static function (Callback $c) use ($e1, $e2) {
+                            $c($e1);
+                            $c($e2);
 
-                                   return true;
-                               }
-                           )
-                       ),
-                   ]
+                            return true;
+                        }
+                    )
+                ),
             )
         ;
 
-        $that = $this;
         $this->object->addBefore(
             CallbackBuilder::create($this->statemachine)
                 ->addTo('foobar')
                 ->setCallable(
-                    static function ($object, TransitionEvent $event) use ($that) {
-                        $that->assertSame('foobar', $event->getTransition()->getState());
+                    function ($object, TransitionEvent $event) {
+                        $this->assertSame('foobar', $event->getTransition()->getState());
 
-                        $that->assertInstanceOf(StatefulInterface::class, $object);
+                        $this->assertInstanceOf(StatefulInterface::class, $object);
                     }
                 )
                 ->getCallback()
@@ -133,53 +165,88 @@ class CallbackHandlerTest extends TestCase
 
     public function testItAttachsPreTransitionWithFromSpec(): void
     {
-        $e1 = $this->getMockBuilder(TransitionEvent::class)->disableOriginalConstructor()->getMock();
-        $e2 = $this->getMockBuilder(TransitionEvent::class)->disableOriginalConstructor()->getMock();
+        $e1 = $this->getMockBuilder(TransitionEvent::class)
+            ->disableOriginalConstructor()
+            ->getMock()
+        ;
+
+        $e2 = $this->getMockBuilder(TransitionEvent::class)
+            ->disableOriginalConstructor()
+            ->getMock()
+        ;
+
         $stateOk = $this->createMock(StateInterface::class);
+
         $stateNotOk = $this->createMock(StateInterface::class);
+
         $transition = $this->createMock(TransitionInterface::class);
+
         $stateful = $this->createMock(StatefulInterface::class);
 
-        $this->statemachine->method('getObject')->willReturn($stateful);
-        $e1->method('getStateMachine')->willReturn($this->statemachine);
-        $e2->method('getStateMachine')->willReturn($this->statemachine);
-        $e1->method('getTransition')->willReturn($transition);
-        $e2->method('getTransition')->willReturn($transition);
-        $e1->method('getInitialState')->willReturn($stateOk);
-        $e2->method('getInitialState')->willReturn($stateNotOk);
-        $stateOk->method('getName')->willReturn('foobar');
-        $stateNotOk->method('getName')->willReturn('bazqux');
+        $this->statemachine->method('getObject')
+            ->willReturn($stateful)
+        ;
+
+        $e1->method('getStateMachine')
+            ->willReturn($this->statemachine)
+        ;
+
+        $e2->method('getStateMachine')
+            ->willReturn($this->statemachine)
+        ;
+
+        $e1->method('getTransition')
+            ->willReturn($transition)
+        ;
+
+        $e2->method('getTransition')
+            ->willReturn($transition)
+        ;
+
+        $e1->method('getInitialState')
+            ->willReturn($stateOk)
+        ;
+
+        $e2->method('getInitialState')
+            ->willReturn($stateNotOk)
+        ;
+
+        $stateOk->method('getName')
+            ->willReturn('foobar')
+        ;
+
+        $stateNotOk->method('getName')
+            ->willReturn('bazqux')
+        ;
 
         $this->dispatcher
             ->expects($this->at(0))
             ->method('addListener')
             ->with(
-                ...[
-                       FiniteEvents::PRE_TRANSITION,
-                       $this->logicalAnd(
-                           $this->isInstanceOf(Callback::class),
-                           $this->callback(
-                               static function (Callback $c) use ($e1, $e2) {
-                                   $c($e1);
-                                   $c($e2);
+                FiniteEvents::PRE_TRANSITION,
+                $this->logicalAnd(
+                    $this->isInstanceOf(Callback::class),
+                    $this->callback(
+                        static function (Callback $c) use ($e1, $e2) {
+                            $c($e1);
+                            $c($e2);
 
-                                   return true;
-                               }
-                           )
-                       ),
-                   ]
+                            return true;
+                        }
+                    )
+                ),
+
             )
         ;
 
-        $that = $this;
         $this->object->addBefore(
             CallbackBuilder::create($this->statemachine)
                 ->addFrom('foobar')
                 ->setCallable(
-                    static function ($object, TransitionEvent $event) use ($that) {
-                        $that->assertSame('foobar', $event->getInitialState()->getName());
+                    function ($object, TransitionEvent $event) {
+                        $this->assertSame('foobar', $event->getInitialState()->getName());
 
-                        $that->assertInstanceOf(StatefulInterface::class, $object);
+                        $this->assertInstanceOf(StatefulInterface::class, $object);
                     }
                 )
                 ->getCallback()
@@ -188,53 +255,87 @@ class CallbackHandlerTest extends TestCase
 
     public function testItAttachsPreTransitionWithExcludeFromSpec(): void
     {
-        $e1 = $this->getMockBuilder(TransitionEvent::class)->disableOriginalConstructor()->getMock();
-        $e2 = $this->getMockBuilder(TransitionEvent::class)->disableOriginalConstructor()->getMock();
+        $e1 = $this->getMockBuilder(TransitionEvent::class)
+            ->disableOriginalConstructor()
+            ->getMock()
+        ;
+
+        $e2 = $this->getMockBuilder(TransitionEvent::class)
+            ->disableOriginalConstructor()
+            ->getMock()
+        ;
+
         $stateOk = $this->createMock(StateInterface::class);
+
         $stateNotOk = $this->createMock(StateInterface::class);
+
         $transition = $this->createMock(TransitionInterface::class);
+
         $stateful = $this->createMock(StatefulInterface::class);
 
-        $this->statemachine->method('getObject')->willReturn($stateful);
-        $e1->method('getStateMachine')->willReturn($this->statemachine);
-        $e2->method('getStateMachine')->willReturn($this->statemachine);
-        $e1->method('getTransition')->willReturn($transition);
-        $e2->method('getTransition')->willReturn($transition);
-        $e1->method('getInitialState')->willReturn($stateOk);
-        $e2->method('getInitialState')->willReturn($stateNotOk);
-        $stateOk->method('getName')->willReturn('foobar');
-        $stateNotOk->method('getName')->willReturn('bazqux');
+        $this->statemachine->method('getObject')
+            ->willReturn($stateful)
+        ;
+
+        $e1->method('getStateMachine')
+            ->willReturn($this->statemachine)
+        ;
+
+        $e2->method('getStateMachine')
+            ->willReturn($this->statemachine)
+        ;
+
+        $e1->method('getTransition')
+            ->willReturn($transition)
+        ;
+
+        $e2->method('getTransition')
+            ->willReturn($transition)
+        ;
+
+        $e1->method('getInitialState')
+            ->willReturn($stateOk)
+        ;
+
+        $e2->method('getInitialState')
+            ->willReturn($stateNotOk)
+        ;
+
+        $stateOk->method('getName')
+            ->willReturn('foobar')
+        ;
+
+        $stateNotOk->method('getName')
+            ->willReturn('bazqux')
+        ;
 
         $this->dispatcher
             ->expects($this->at(0))
             ->method('addListener')
             ->with(
-                ...[
-                       FiniteEvents::PRE_TRANSITION,
-                       $this->logicalAnd(
-                           $this->isInstanceOf(Callback::class),
-                           $this->callback(
-                               static function (Callback $c) use ($e1, $e2) {
-                                   $c($e1);
-                                   $c($e2);
+                FiniteEvents::PRE_TRANSITION,
+                $this->logicalAnd(
+                    $this->isInstanceOf(Callback::class),
+                    $this->callback(
+                        static function (Callback $c) use ($e1, $e2) {
+                            $c($e1);
+                            $c($e2);
 
-                                   return true;
-                               }
-                           )
-                       ),
-                   ]
+                            return true;
+                        }
+                    )
+                ),
             )
         ;
 
-        $that = $this;
         $this->object->addBefore(
             CallbackBuilder::create($this->statemachine)
                 ->addFrom('-bazqux')
                 ->setCallable(
-                    static function ($object, TransitionEvent $event) use ($that) {
-                        $that->assertSame('foobar', $event->getInitialState()->getName());
+                    function ($object, TransitionEvent $event) {
+                        $this->assertSame('foobar', $event->getInitialState()->getName());
 
-                        $that->assertInstanceOf(StatefulInterface::class, $object);
+                        $this->assertInstanceOf(StatefulInterface::class, $object);
                     }
                 )
                 ->getCallback()
@@ -244,51 +345,86 @@ class CallbackHandlerTest extends TestCase
     public function testItAttachsPreTransitionWithExcludeToSpec(): void
     {
         $transitionOk = $this->createMock(TransitionInterface::class);
+
         $transitionNotOk = $this->createMock(TransitionInterface::class);
+
         $state = $this->createMock(StateInterface::class);
-        $e1 = $this->getMockBuilder(TransitionEvent::class)->disableOriginalConstructor()->getMock();
-        $e2 = $this->getMockBuilder(TransitionEvent::class)->disableOriginalConstructor()->getMock();
+
+        $e1 = $this->getMockBuilder(TransitionEvent::class)
+            ->disableOriginalConstructor()
+            ->getMock()
+        ;
+
+        $e2 = $this->getMockBuilder(TransitionEvent::class)
+            ->disableOriginalConstructor()
+            ->getMock()
+        ;
+
         $stateful = $this->createMock(StatefulInterface::class);
 
-        $this->statemachine->method('getObject')->willReturn($stateful);
-        $e1->method('getStateMachine')->willReturn($this->statemachine);
-        $e2->method('getStateMachine')->willReturn($this->statemachine);
-        $e1->method('getInitialState')->willReturn($state);
-        $e2->method('getInitialState')->willReturn($state);
-        $transitionOk->method('getState')->willReturn('foobar');
-        $transitionNotOk->method('getState')->willReturn('bazqux');
-        $e1->method('getTransition')->willReturn($transitionOk);
-        $e2->method('getTransition')->willReturn($transitionNotOk);
+        $this->statemachine->method('getObject')
+            ->willReturn($stateful)
+        ;
+
+        $e1->method('getStateMachine')
+            ->willReturn($this->statemachine)
+        ;
+
+        $e2->method('getStateMachine')
+            ->willReturn($this->statemachine)
+        ;
+
+        $e1->method('getInitialState')
+            ->willReturn($state)
+        ;
+
+        $e2->method('getInitialState')
+            ->willReturn($state)
+        ;
+
+        $transitionOk->method('getState')
+            ->willReturn('foobar')
+        ;
+
+        $transitionNotOk->method('getState')
+            ->willReturn('bazqux')
+        ;
+
+        $e1->method('getTransition')
+            ->willReturn($transitionOk)
+        ;
+
+        $e2->method('getTransition')
+            ->willReturn($transitionNotOk)
+        ;
 
         $this->dispatcher
             ->expects($this->at(0))
             ->method('addListener')
             ->with(
-                ...[
-                       FiniteEvents::PRE_TRANSITION,
-                       $this->logicalAnd(
-                           $this->isInstanceOf(Callback::class),
-                           $this->callback(
-                               static function (Callback $c) use ($e1, $e2) {
-                                   $c($e1);
-                                   $c($e2);
+                FiniteEvents::PRE_TRANSITION,
+                $this->logicalAnd(
+                    $this->isInstanceOf(Callback::class),
+                    $this->callback(
+                        static function (Callback $c) use ($e1, $e2) {
+                            $c($e1);
+                            $c($e2);
 
-                                   return true;
-                               }
-                           )
-                       ),
-                   ]
+                            return true;
+                        }
+                    )
+                ),
+
             )
         ;
 
-        $that = $this;
         $this->object->addBefore(
             CallbackBuilder::create($this->statemachine)
                 ->addTo('-bazqux')
                 ->setCallable(
-                    static function ($object, TransitionEvent $event) use ($that, $stateful) {
-                        $that->assertSame($object, $stateful);
-                        $that->assertSame('foobar', $event->getTransition()->getState());
+                    function ($object, TransitionEvent $event) use ($stateful) {
+                        $this->assertSame($object, $stateful);
+                        $this->assertSame('foobar', $event->getTransition()->getState());
                     }
                 )
                 ->getCallback()

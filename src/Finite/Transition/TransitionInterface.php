@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Transition;
 
 use Finite\StateMachine\StateMachineInterface;
@@ -13,38 +15,26 @@ interface TransitionInterface
 {
     /**
      * Returns the array of states that supports this transition.
-     *
-     * @return array
      */
     public function getInitialStates(): array;
 
     /**
      * Returns the state resulting of this transition.
-     *
-     * @return string
      */
     public function getState(): string;
 
     /**
      * Process the transition.
-     *
-     * @param \Finite\StateMachine\StateMachineInterface $stateMachine
-     *
-     * @return mixed
      */
-    public function process(StateMachineInterface $stateMachine);
+    public function process(StateMachineInterface $stateMachine): mixed;
 
     /**
      * Returns the name of the transition.
-     *
-     * @return string
      */
     public function getName(): string;
 
     /**
      * Returns the closure. If closure execution returns false, transition cannot be applied.
-     *
-     * @return callable|null
      */
     public function getGuard(): ?callable;
 }

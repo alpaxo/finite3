@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Event\Callback;
 
 use Finite\StateMachine\StateMachineInterface;
@@ -11,10 +13,5 @@ use Finite\StateMachine\StateMachineInterface;
  */
 interface CallbackBuilderFactoryInterface
 {
-    /**
-     * @param StateMachineInterface $stateMachine
-     *
-     * @return mixed
-     */
-    public function createBuilder(StateMachineInterface $stateMachine);
+    public function createBuilder(StateMachineInterface $stateMachine): CallbackBuilder;
 }

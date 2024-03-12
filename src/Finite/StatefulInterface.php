@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite;
 
 /**
@@ -10,17 +12,7 @@ namespace Finite;
  */
 interface StatefulInterface
 {
-    /**
-     * Gets the object state.
-     *
-     * @return string
-     */
     public function getFiniteState(): string;
 
-    /**
-     * Sets the object state.
-     *
-     * @param string $state
-     */
-    public function setFiniteState($state);
+    public function setFiniteState(string $state);
 }

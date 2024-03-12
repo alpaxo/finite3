@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\StateMachine;
 
 use Finite\Transition\TransitionInterface;
@@ -15,14 +17,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  */
 class SecurityAwareStateMachine extends StateMachine
 {
-    /**
-     * @var AuthorizationCheckerInterface
-     */
-    protected $authorizationChecker;
+    protected AuthorizationCheckerInterface $authorizationChecker;
 
-    /**
-     * @param AuthorizationCheckerInterface $authorizationChecker
-     */
     public function setSecurityContext(AuthorizationCheckerInterface $authorizationChecker): void
     {
         $this->authorizationChecker = $authorizationChecker;
@@ -32,7 +28,7 @@ class SecurityAwareStateMachine extends StateMachine
      * {@inheritdoc}
      * @throws \Finite\Exception\TransitionException
      */
-    public function can($transition, array $parameters = []): bool
+    public function can(TransitionInterface|string $transition, array $parameters = []): bool
     {
         $transition = $transition instanceof TransitionInterface ? $transition : $this->getTransition($transition);
 

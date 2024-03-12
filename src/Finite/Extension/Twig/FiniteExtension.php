@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Extension\Twig;
 
 use Finite\Context;
@@ -13,14 +15,8 @@ use Twig\TwigFunction;
  */
 class FiniteExtension extends AbstractExtension
 {
-    /**
-     * @var Context
-     */
-    protected $context;
+    protected Context $context;
 
-    /**
-     * @param Context $context
-     */
     public function __construct(Context $context)
     {
         $this->context = $context;
@@ -29,7 +25,7 @@ class FiniteExtension extends AbstractExtension
     /**
      * {@inheritdoc}
      */
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return [
             new TwigFunction('finite_state', [$this, 'getFiniteState']),
@@ -40,68 +36,35 @@ class FiniteExtension extends AbstractExtension
         ];
     }
 
-    /**
-     * @param object $object
-     * @param string $graph
-     *
-     * @return string
-     */
-    public function getFiniteState($object, $graph = 'default')
+    public function getFiniteState(object $object, string $graph = 'default'): string
     {
         return $this->context->getState($object, $graph);
     }
 
     /**
-     * @param object $object
-     * @param string $graph
-     * @param bool   $as_object
-     *
-     * @return array
+     * @throws \Finite\Exception\TransitionException
      */
-    public function getFiniteTransitions($object, $graph = 'default', $as_object = false)
+    public function getFiniteTransitions(object $object, string $graph = 'default', bool $asObject = false): array
     {
-        return $this->context->getTransitions($object, $graph, $as_object);
+        return $this->context->getTransitions($object, $graph, $asObject);
     }
 
-    /**
-     * @param object $object
-     * @param string $graph
-     *
-     * @return array
-     */
-    public function getFiniteProperties($object, $graph = 'default')
+    public function getFiniteProperties(object $object, string $graph = 'default'): array
     {
         return $this->context->getProperties($object, $graph);
     }
 
-    /**
-     * @param object $object
-     * @param string $property
-     * @param string $graph
-     *
-     * @return bool
-     */
-    public function hasFiniteProperty($object, $property, $graph = 'default')
+    public function hasFiniteProperty(object $object, string $property, string $graph = 'default'): bool
     {
         return $this->context->hasProperty($object, $property, $graph);
     }
 
-    /**
-     * @param object $object
-     * @param string $transition
-     * @param string $graph
-     *
-     * @return bool|mixed
-     */
-    public function canFiniteTransition($object, $transition, $graph = 'default')
+    public function canFiniteTransition(object $object, string $transition, string $graph = 'default'): bool
     {
         return $this->context->getStateMachine($object, $graph)->can($transition);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getName()
+    public function getName(): string
     {
         return 'finite';
     }

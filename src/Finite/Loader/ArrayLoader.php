@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Loader;
 
+use Closure;
 use Finite\Event\Callback\CallbackBuilderFactory;
 use Finite\Event\Callback\CallbackBuilderFactoryInterface;
 use Finite\Event\CallbackHandler;
@@ -21,26 +24,12 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class ArrayLoader implements LoaderInterface
 {
-    /**
-     * @var array
-     */
-    private $config;
+    private array $config;
 
-    /**
-     * @var CallbackHandler
-     */
-    private $callbackHandler;
+    private ?CallbackHandler $callbackHandler;
 
-    /**
-     * @var CallbackBuilderFactoryInterface
-     */
-    private $callbackBuilderFactory;
+    private ?CallbackBuilderFactoryInterface $callbackBuilderFactory;
 
-    /**
-     * @param array                           $config
-     * @param CallbackHandler                 $handler
-     * @param CallbackBuilderFactoryInterface $callbackBuilderFactory
-     */
     public function __construct(array $config, CallbackHandler $handler = null, CallbackBuilderFactoryInterface $callbackBuilderFactory = null)
     {
         $this->callbackHandler = $handler;
@@ -85,7 +74,7 @@ class ArrayLoader implements LoaderInterface
      * {@inheritdoc}
      * @throws \ReflectionException
      */
-    public function supports($object, $graph = 'default'): bool
+    public function supports(object $object, string $graph = 'default'): bool
     {
         $reflection = new ReflectionClass($this->config['class']);
 
@@ -98,7 +87,14 @@ class ArrayLoader implements LoaderInterface
     private function loadStates(StateMachineInterface $stateMachine): void
     {
         $resolver = new OptionsResolver();
-        $resolver->setDefaults(['type' => StateInterface::TYPE_NORMAL, 'properties' => []]);
+
+        $resolver->setDefaults(
+            [
+                'type' => StateInterface::TYPE_NORMAL,
+                'properties' => [],
+            ]
+        );
+
         $resolver->setAllowedValues(
             'type',
             [
@@ -114,17 +110,27 @@ class ArrayLoader implements LoaderInterface
         }
     }
 
-    /**
-     * @param \Finite\StateMachine\StateMachineInterface $stateMachine
-     * @noinspection PhpUnusedParameterInspection
-     */
     private function loadTransitions(StateMachineInterface $stateMachine): void
     {
         $resolver = new OptionsResolver();
-        $resolver->setRequired(['from', 'to']);
-        $resolver->setDefaults(['guard' => null, 'configure_properties' => null, 'properties' => []]);
+        $resolver->setRequired(
+            [
+                'from',
+                'to',
+            ]
+        );
+        $resolver->setDefaults(
+            [
+                'guard' => null,
+                'configure_properties' => null,
+                'properties' => [],
+            ]
+        );
 
-        $resolver->setAllowedTypes('configure_properties', ['null', 'callable']);
+        $resolver->setAllowedTypes('configure_properties', [
+            'null',
+            'callable',
+        ]);
 
         $resolver->setNormalizer(
             'from',
@@ -132,12 +138,14 @@ class ArrayLoader implements LoaderInterface
                 return (array)$v;
             }
         );
+
         $resolver->setNormalizer(
             'guard',
-            static function (Options $options, $v) {
+            static function (Options $options, Closure|array|null $v = null) {
                 return $v ?? null;
             }
         );
+
         $resolver->setNormalizer(
             'configure_properties',
             static function (Options $options, $v) {
@@ -167,9 +175,6 @@ class ArrayLoader implements LoaderInterface
         }
     }
 
-    /**
-     * @param \Finite\StateMachine\StateMachineInterface $stateMachine
-     */
     private function loadCallbacks(StateMachineInterface $stateMachine): void
     {
         if (!isset($this->config['callbacks'])) {
@@ -204,7 +209,6 @@ class ArrayLoader implements LoaderInterface
         }
     }
 
-    /** @noinspection PhpUnusedParameterInspection */
     private function getCallbacksResolver(): OptionsResolver
     {
         $resolver = new OptionsResolver();
@@ -226,6 +230,7 @@ class ArrayLoader implements LoaderInterface
         $toArrayNormalizer = static function (Options $options, $value) {
             return (array)$value;
         };
+
         $resolver->setNormalizer('on', $toArrayNormalizer);
         $resolver->setNormalizer('from', $toArrayNormalizer);
         $resolver->setNormalizer('to', $toArrayNormalizer);

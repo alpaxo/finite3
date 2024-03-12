@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Event\Callback;
 
 use Finite\StateMachine\StateMachineInterface;
@@ -11,10 +13,7 @@ use Finite\StateMachine\StateMachineInterface;
  */
 class CallbackBuilderFactory implements CallbackBuilderFactoryInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function createBuilder(StateMachineInterface $stateMachine)
+    public function createBuilder(StateMachineInterface $stateMachine): CallbackBuilder
     {
         return CallbackBuilder::create($stateMachine);
     }

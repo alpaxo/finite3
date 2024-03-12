@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Event;
 
 use Finite\StateMachine\StateMachine;
+use Finite\StateMachine\StateMachineInterface;
 use Symfony\Component\EventDispatcher\GenericEvent as Event;
 
 /**
@@ -12,23 +15,16 @@ use Symfony\Component\EventDispatcher\GenericEvent as Event;
  */
 class StateMachineEvent extends Event
 {
-    /**
-     * @var StateMachine
-     */
-    protected $stateMachine;
+    protected StateMachine $stateMachine;
 
-    /**
-     * @param StateMachine $stateMachine
-     */
     public function __construct(StateMachine $stateMachine)
     {
         $this->stateMachine = $stateMachine;
+
+        parent::__construct();
     }
 
-    /**
-     * @return StateMachine
-     */
-    public function getStateMachine()
+    public function getStateMachine(): StateMachineInterface
     {
         return $this->stateMachine;
     }

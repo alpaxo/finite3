@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Event;
 
 use Finite\Event\Callback\Callback;
@@ -19,39 +21,30 @@ class CallbackHandler
     /**
      * @deprecated To be removed in 2.0
      */
-    const ALL = 'all';
+    public const ALL = 'all';
 
-    /**
-     * @var EventDispatcherInterface
-     */
-    protected $dispatcher;
+    protected EventDispatcherInterface $dispatcher;
 
-    /**
-     * @var OptionsResolver
-     */
-    protected $specResolver;
+    protected OptionsResolver $specResolver;
 
-    /**
-     * @param EventDispatcherInterface $dispatcher
-     */
     public function __construct(EventDispatcherInterface $dispatcher)
     {
         $this->dispatcher = $dispatcher;
         $this->specResolver = new OptionsResolver();
         $this->specResolver->setDefaults(
-            array(
+            [
                 'on' => self::ALL,
                 'from' => self::ALL,
                 'to' => self::ALL,
-            )
+            ]
         );
 
-        $this->specResolver->setAllowedTypes('on', array('string', 'array'));
-        $this->specResolver->setAllowedTypes('from', array('string', 'array'));
-        $this->specResolver->setAllowedTypes('to', array('string', 'array'));
+        $this->specResolver->setAllowedTypes('on', ['string', 'array']);
+        $this->specResolver->setAllowedTypes('from', ['string', 'array']);
+        $this->specResolver->setAllowedTypes('to', ['string', 'array']);
 
         $toArrayNormalizer = function (Options $options, $value) {
-            return (array) $value;
+            return (array)$value;
         };
 
         $this->specResolver->setNormalizer('on', $toArrayNormalizer);
@@ -60,13 +53,9 @@ class CallbackHandler
     }
 
     /**
-     * @param StateMachineInterface|Callback $smOrCallback
-     * @param callable                       $callback
-     * @param array                          $spec
-     *
-     * @return CallbackHandler
+     * @return \Finite\Event\CallbackHandler
      */
-    public function addBefore($smOrCallback, $callback = null, array $spec = array())
+    public function addBefore(Callback|StateMachineInterface $smOrCallback, callable $callback = null, array $spec = [])
     {
         $this->add($smOrCallback, FiniteEvents::PRE_TRANSITION, $callback, $spec);
 
@@ -74,13 +63,9 @@ class CallbackHandler
     }
 
     /**
-     * @param StateMachineInterface|Callback $smOrCallback
-     * @param callable                       $callback
-     * @param array                          $spec
-     *
-     * @return CallbackHandler
+     * @return \Finite\Event\CallbackHandler
      */
-    public function addAfter($smOrCallback, $callback = null, array $spec = array())
+    public function addAfter(Callback|StateMachineInterface $smOrCallback, callable $callback = null, array $spec = [])
     {
         $this->add($smOrCallback, FiniteEvents::POST_TRANSITION, $callback, $spec);
 
@@ -88,14 +73,9 @@ class CallbackHandler
     }
 
     /**
-     * @param StateMachineInterface|Callback $smOrCallback
-     * @param string                         $event
-     * @param callable                       $callable
-     * @param array                          $specs
-     *
-     * @return CallbackHandler
+     * @return \Finite\Event\CallbackHandler
      */
-    protected function add($smOrCallback, $event, $callable = null, array $specs = array())
+    protected function add(Callback|StateMachineInterface $smOrCallback, string $event, callable $callable = null, array $specs = [])
     {
         if ($smOrCallback instanceof Callback) {
             $this->dispatcher->addListener($event, $smOrCallback);

@@ -17,22 +17,24 @@ class FiniteFiniteExtension extends Extension
 {
     /**
      * {@inheritdoc}
+     * @throws \Exception
      */
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
         $factoryDefinition = $container->getDefinition('finite.factory');
 
         $smDefinition = $container->getDefinition('finite.state_machine');
         if (method_exists($smDefinition, 'setShared')) {
             $smDefinition->setShared(false);
-        } else {
-            $smDefinition->setScope('prototype');
         }
+//        else {
+//            $smDefinition->setScope('prototype');
+//        }
 
         foreach ($config as $key => $stateMachineConfig) {
             $stateMachineConfig = $this->removeDisabledCallbacks($stateMachineConfig);
@@ -46,10 +48,10 @@ class FiniteFiniteExtension extends Extension
                 $definition->setLazy(true);
             }
 
-            $serviceId = 'finite.loader.'.$key;
+            $serviceId = 'finite.loader.' . $key;
             $container->setDefinition($serviceId, $definition);
 
-            $factoryDefinition->addMethodCall('addLoader', array(new Reference($serviceId)));
+            $factoryDefinition->addMethodCall('addLoader', [new Reference($serviceId)]);
         }
 
         $container->removeDefinition('finite.array_loader');
@@ -62,13 +64,13 @@ class FiniteFiniteExtension extends Extension
      *
      * @return array
      */
-    protected function removeDisabledCallbacks(array $config)
+    protected function removeDisabledCallbacks(array $config): array
     {
         if (!isset($config['callbacks'])) {
             return $config;
         }
 
-        foreach (array('before', 'after') as $position) {
+        foreach (['before', 'after'] as $position) {
             foreach ($config['callbacks'][$position] as $i => $callback) {
                 if ($callback['disabled']) {
                     unset($config['callbacks'][$position][$i]);

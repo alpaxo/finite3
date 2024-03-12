@@ -1,33 +1,36 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Test\Event;
 
 use Finite\Event\TransitionEvent;
 use Finite\State\State;
 use Finite\StateMachine\StateMachine;
 use Finite\Transition\Transition;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class TransitionEventTest extends TestCase
 {
-    /**
-     * @var \Finite\Transition\Transition
-     */
-    protected $transition;
+    protected MockObject $transition;
+
+    protected TransitionEvent $object;
 
     /**
-     * @var TransitionEvent
+     * @throws \Finite\Exception\TransitionException
      */
-    protected $object;
-
     protected function setUp(): void
     {
-        $this->transition = $this->getMockBuilder(Transition::class)->disableOriginalConstructor()->getMock();
+        $this->transition = $this->getMockBuilder(Transition::class)
+            ->disableOriginalConstructor()
+            ->getMock()
+        ;
 
         $this->transition
             ->expects($this->once())
             ->method('resolveProperties')
-            ->with(...[$this->isType('array')])
+            ->with($this->isType('array'))
             ->willReturn(['returned' => 1])
         ;
 
@@ -48,6 +51,6 @@ class TransitionEventTest extends TestCase
     {
         $this->assertSame(1, $this->object->get('returned'));
         $this->assertTrue($this->object->has('returned'));
-        $this->assertNull($this->object->get('foo', null));
+        $this->assertNull($this->object->get('foo'));
     }
 }
