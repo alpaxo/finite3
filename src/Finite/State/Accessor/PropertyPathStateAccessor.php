@@ -5,6 +5,7 @@ namespace Finite\State\Accessor;
 use Finite\Exception\NoSuchPropertyException;
 use Symfony\Component\PropertyAccess\Exception\NoSuchPropertyException as SymfonyNoSuchPropertyException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
 /**
@@ -14,21 +15,11 @@ use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
  */
 class PropertyPathStateAccessor implements StateAccessorInterface
 {
-    /**
-     * @var string
-     */
-    private $propertyPath;
+    private string $propertyPath;
 
-    /**
-     * @var PropertyAccessorInterface
-     */
-    private $propertyAccessor;
+    private PropertyAccessor|PropertyAccessorInterface $propertyAccessor;
 
-    /**
-     * @param string                    $propertyPath
-     * @param PropertyAccessorInterface $propertyAccessor
-     */
-    public function __construct($propertyPath = 'finiteState', PropertyAccessorInterface $propertyAccessor = null)
+    public function __construct(string $propertyPath = 'finiteState', PropertyAccessorInterface $propertyAccessor = null)
     {
         $this->propertyPath = $propertyPath;
         $this->propertyAccessor = $propertyAccessor ?: PropertyAccess::createPropertyAccessor();
@@ -37,7 +28,7 @@ class PropertyPathStateAccessor implements StateAccessorInterface
     /**
      * {@inheritdoc}
      */
-    public function getState($object): ?string
+    public function getState(object $object): ?string
     {
         try {
             return $this->propertyAccessor->getValue($object, $this->propertyPath) ?: null;
@@ -55,7 +46,7 @@ class PropertyPathStateAccessor implements StateAccessorInterface
     /**
      * {@inheritdoc}
      */
-    public function setState(&$object, $value): void
+    public function setState(object $object, string $value): void
     {
         try {
             $this->propertyAccessor->setValue($object, $this->propertyPath, $value);

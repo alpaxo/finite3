@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Test\StateMachine;
 
 use Finite\Event\StateMachineEvent;
 use Finite\Event\TransitionEvent;
 use Finite\StateMachine\ListenableStateMachine;
+use Finite\StateMachine\StateMachine;
 use Finite\Test\StateMachineTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
@@ -13,15 +16,9 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  */
 class ListenableStateMachineTest extends StateMachineTestCase
 {
-    /**
-     * @var ListenableStateMachine
-     */
-    protected $object;
+    protected StateMachine $object;
 
-    /**
-     * @var \Symfony\Component\EventDispatcher\EventDispatcher
-     */
-    protected $dispatcher;
+    protected EventDispatcher $dispatcher;
 
     public function setUp(): void
     {
@@ -36,117 +33,129 @@ class ListenableStateMachineTest extends StateMachineTestCase
     }
 
     /**
+     * @throws \Finite\Exception\NoSuchPropertyException
      * @throws \Finite\Exception\ObjectException
+     * @throws \Finite\Exception\StateException
+     * @throws \Finite\Exception\TransitionException
      */
     public function testInitialize(): void
     {
         $this->dispatcher
             ->expects($this->once())
             ->method('dispatch')
-            ->with(...[$this->isInstanceOf(StateMachineEvent::class), 'finite.initialize'])
+            ->with($this->isInstanceOf(StateMachineEvent::class), 'finite.initialize')
         ;
 
         $this->initialize();
     }
 
     /**
+     * @throws \Finite\Exception\NoSuchPropertyException
      * @throws \Finite\Exception\ObjectException
      * @throws \Finite\Exception\StateException
+     * @throws \Finite\Exception\TransitionException
      */
     public function testApply(): void
     {
         $this->dispatcher
             ->expects($this->at(1))
             ->method('dispatch')
-            ->with(...[$this->isInstanceOf(TransitionEvent::class), 'finite.test_transition'])
+            ->with($this->isInstanceOf(TransitionEvent::class), 'finite.test_transition')
         ;
 
         $this->dispatcher
             ->expects($this->at(2))
             ->method('dispatch')
-            ->with(...[$this->isInstanceOf(TransitionEvent::class), 'finite.test_transition.t23'])
+            ->with($this->isInstanceOf(TransitionEvent::class), 'finite.test_transition.t23')
         ;
 
         $this->dispatcher
             ->expects($this->at(3))
             ->method('dispatch')
-            ->with(...[$this->isInstanceOf(TransitionEvent::class), 'finite.pre_transition'])
+            ->with($this->isInstanceOf(TransitionEvent::class), 'finite.pre_transition')
         ;
 
         $this->dispatcher
             ->expects($this->at(4))
             ->method('dispatch')
-            ->with(...[$this->isInstanceOf(TransitionEvent::class), 'finite.pre_transition.t23'])
+            ->with($this->isInstanceOf(TransitionEvent::class), 'finite.pre_transition.t23')
         ;
 
         $this->dispatcher
             ->expects($this->at(5))
             ->method('dispatch')
-            ->with(...[$this->isInstanceOf(TransitionEvent::class), 'finite.post_transition'])
+            ->with($this->isInstanceOf(TransitionEvent::class), 'finite.post_transition')
         ;
 
         $this->dispatcher
             ->expects($this->at(6))
             ->method('dispatch')
-            ->with(...[$this->isInstanceOf(TransitionEvent::class), 'finite.post_transition.t23'])
+            ->with($this->isInstanceOf(TransitionEvent::class), 'finite.post_transition.t23')
         ;
 
         $this->initialize();
+
         $this->object->apply('t23');
     }
 
     /**
+     * @throws \Finite\Exception\NoSuchPropertyException
      * @throws \Finite\Exception\ObjectException
+     * @throws \Finite\Exception\StateException
+     * @throws \Finite\Exception\TransitionException
      */
     public function testCan(): void
     {
         $this->dispatcher
             ->expects($this->at(1))
             ->method('dispatch')
-            ->with(...[$this->isInstanceOf(TransitionEvent::class), 'finite.test_transition'])
+            ->with($this->isInstanceOf(TransitionEvent::class), 'finite.test_transition')
         ;
 
         $this->dispatcher
             ->expects($this->at(2))
             ->method('dispatch')
-            ->with(...[$this->isInstanceOf(TransitionEvent::class), 'finite.test_transition.t23'])
+            ->with($this->isInstanceOf(TransitionEvent::class), 'finite.test_transition.t23')
         ;
 
         $this->initialize();
+
         $this->assertFalse($this->object->can('t34'));
         $this->assertTrue($this->object->can('t23'));
     }
 
     /**
+     * @throws \Finite\Exception\NoSuchPropertyException
      * @throws \Finite\Exception\ObjectException
+     * @throws \Finite\Exception\StateException
+     * @throws \Finite\Exception\TransitionException
      */
     public function testCanWithListener(): void
     {
         $this->dispatcher
             ->expects($this->at(1))
             ->method('dispatch')
-            ->with(...[$this->isInstanceOf(TransitionEvent::class), 'finite.test_transition'])
+            ->with($this->isInstanceOf(TransitionEvent::class), 'finite.test_transition')
         ;
 
         $this->dispatcher
             ->expects($this->at(2))
             ->method('dispatch')
             ->with(
-                ...[
-                       $this->callback(
-                           static function ($event) {
-                               $event->reject();
+                $this->callback(
+                    static function ($event) {
+                        $event->reject();
 
-                               return $event instanceof TransitionEvent;
-                           }
-                       ),
-                       'finite.test_transition.t23',
-                   ]
+                        return $event instanceof TransitionEvent;
+                    }
+                ),
+                'finite.test_transition.t23'
+
             )
         ;
 
         $this->initialize();
-        
+
         $this->assertFalse($this->object->can('t34'));
         $this->assertFalse($this->object->can('t23'));
     }

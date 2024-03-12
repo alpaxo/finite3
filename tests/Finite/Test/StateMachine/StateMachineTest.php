@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Test\StateMachine;
 
 use Finite\Event\StateMachineEvent;
@@ -23,6 +25,7 @@ class StateMachineTest extends StateMachineTestCase
     public function testAddState(): void
     {
         $this->object->addState('foo');
+
         $this->assertInstanceOf(StateInterface::class, $this->object->getState('foo'));
 
         $stateMock = $this->createMock(StateInterface::class);
@@ -209,7 +212,10 @@ class StateMachineTest extends StateMachineTestCase
     }
 
     /**
+     * @throws \Finite\Exception\NoSuchPropertyException
      * @throws \Finite\Exception\ObjectException
+     * @throws \Finite\Exception\StateException
+     * @throws \Finite\Exception\TransitionException
      */
     public function testGetStates(): void
     {
@@ -229,7 +235,9 @@ class StateMachineTest extends StateMachineTestCase
     }
 
     /**
+     * @throws \Finite\Exception\NoSuchPropertyException
      * @throws \Finite\Exception\ObjectException
+     * @throws \Finite\Exception\StateException
      * @throws \Finite\Exception\TransitionException
      */
     public function testGetStateFromObject(): void
@@ -240,7 +248,10 @@ class StateMachineTest extends StateMachineTestCase
             ->addMethods(['__toString'])
             ->getMock()
         ;
-        $state->expects($this->once())->method('__toString')->willReturn('s1');
+
+        $state->expects($this->once())->method('__toString')
+            ->willReturn('s1')
+        ;
 
         $this->assertInstanceOf(State::class, $this->object->getState($state));
     }

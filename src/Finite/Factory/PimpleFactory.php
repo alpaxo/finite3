@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Factory;
 
 use Finite\StateMachine\StateMachineInterface;
@@ -12,21 +14,11 @@ use Pimple\Container;
  */
 class PimpleFactory extends AbstractFactory
 {
-    /**
-     * @var \Pimple\Container
-     */
-    protected $container;
+    protected Container $container;
 
-    /**
-     * @var string
-     */
-    protected $id;
+    protected string $id;
 
-    /**
-     * @param \Pimple\Container $container
-     * @param string            $id
-     */
-    public function __construct(Container $container, $id)
+    public function __construct(Container $container, string $id)
     {
         $this->container = $container;
         $this->id = $id;

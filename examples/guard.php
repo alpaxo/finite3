@@ -19,7 +19,7 @@ class Document implements StatefulInterface
         return (string)$this->state;
     }
 
-    public function setFiniteState($state)
+    public function setFiniteState(string $state)
     {
         $this->state = $state;
     }

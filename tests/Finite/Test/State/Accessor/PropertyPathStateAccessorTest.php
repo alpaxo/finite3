@@ -1,19 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Test\State\Accessor;
 
 use Finite\State\Accessor\PropertyPathStateAccessor;
 use Finite\StatefulInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\PropertyAccess\Exception\NoSuchPropertyException;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
 class PropertyPathStateAccessorTest extends TestCase
 {
-    /**
-     * @var \PHPUnit\Framework\MockObject\MockObject
-     */
-    protected $propertyAccessor;
+    protected MockObject $propertyAccessor;
 
     protected function setUp(): void
     {
@@ -26,23 +26,25 @@ class PropertyPathStateAccessorTest extends TestCase
     public function testGetState(): void
     {
         $object = new PropertyPathStateAccessor('bar', $this->propertyAccessor);
+
         $stateful = $this->createMock(StatefulInterface::class);
 
         $this->propertyAccessor
             ->expects($this->at(0))
             ->method('getValue')
-            ->with(...[$stateful, 'bar'])
-            ->willReturn('foo')
+            ->with($stateful, 'bar')
+            ->willReturnOnConsecutiveCalls('foo')
         ;
 
         $this->assertSame('foo', $object->getState($stateful));
 
         $object = new PropertyPathStateAccessor('finiteState', $this->propertyAccessor);
+
         $this->propertyAccessor
             ->expects($this->at(0))
             ->method('getValue')
-            ->with(...[$stateful, 'finiteState'])
-            ->willReturn('foo')
+            ->with($stateful, 'finiteState')
+            ->willReturnOnConsecutiveCalls('foo')
         ;
 
         $this->assertSame('foo', $object->getState($stateful));
@@ -54,22 +56,24 @@ class PropertyPathStateAccessorTest extends TestCase
     public function testSetState(): void
     {
         $object = new PropertyPathStateAccessor('bar', $this->propertyAccessor);
+
         $stateful = $this->createMock(StatefulInterface::class);
 
         $this->propertyAccessor
             ->expects($this->at(0))
             ->method('setValue')
-            ->with(...[$stateful, 'bar', 'foo'])
+            ->with($stateful, 'bar', 'foo')
             ->willReturn('foo')
         ;
 
         $object->setState($stateful, 'foo');
 
         $object = new PropertyPathStateAccessor('finiteState', $this->propertyAccessor);
+
         $this->propertyAccessor
             ->expects($this->at(0))
             ->method('setValue')
-            ->with(...[$stateful, 'finiteState'])
+            ->with($stateful, 'finiteState')
             ->willReturn('foo')
         ;
 
@@ -89,7 +93,7 @@ class PropertyPathStateAccessorTest extends TestCase
         $this->propertyAccessor
             ->expects($this->once())
             ->method('setValue')
-            ->with(...[$stateful, 'bar', 'foo'])
+            ->with($stateful, 'bar', 'foo')
             ->willThrowException(new NoSuchPropertyException)
         ;
 
@@ -109,7 +113,7 @@ class PropertyPathStateAccessorTest extends TestCase
         $this->propertyAccessor
             ->expects($this->once())
             ->method('getValue')
-            ->with(...[$stateful, 'bar'])
+            ->with($stateful, 'bar')
             ->willThrowException(new NoSuchPropertyException)
         ;
 

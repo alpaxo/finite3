@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Factory;
 
 use Finite\StateMachine\StateMachineInterface;
@@ -13,11 +15,6 @@ interface FactoryInterface
 {
     /**
      * Returns a StateMachine instance initialized on $object.
-     *
-     * @param object $object
-     * @param string $graph
-     *
-     * @return \Finite\StateMachine\StateMachineInterface
      */
-    public function get($object, $graph = 'default'): StateMachineInterface;
+    public function get(object $object, string $graph = 'default'): StateMachineInterface;
 }

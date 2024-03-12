@@ -13,10 +13,6 @@ interface CallbackSpecificationInterface
 {
     /**
      * Return if this callback carried by this spec should be called on this event.
-     *
-     * @param TransitionEvent $event
-     *
-     * @return bool
      */
-    public function isSatisfiedBy(TransitionEvent $event);
+    public function isSatisfiedBy(TransitionEvent $event): bool;
 }

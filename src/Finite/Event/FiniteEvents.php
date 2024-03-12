@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Event;
 
 /**
@@ -9,7 +11,7 @@ namespace Finite\Event;
  */
 final class FiniteEvents
 {
-    const
+    public const
         /*
          * This event is thrown when an object got its initial state
          */
@@ -33,6 +35,5 @@ final class FiniteEvents
         /*
          * Fired when a transition test is made.
          */
-        TEST_TRANSITION = 'finite.test_transition'
-    ;
+        TEST_TRANSITION = 'finite.test_transition';
 }

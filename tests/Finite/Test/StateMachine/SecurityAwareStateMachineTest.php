@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Test\StateMachine;
 
 use Finite\State\Accessor\StateAccessorInterface;
 use Finite\StatefulInterface;
 use Finite\StateMachine\SecurityAwareStateMachine;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
@@ -13,20 +16,22 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  */
 class SecurityAwareStateMachineTest extends TestCase
 {
-    /**
-     * @var SecurityAwareStateMachine
-     */
-    protected $object;
+    protected SecurityAwareStateMachine $object;
 
-    protected $accessor;
+    protected MockObject $accessor;
 
     /**
+     * @throws \Finite\Exception\NoSuchPropertyException
      * @throws \Finite\Exception\ObjectException
+     * @throws \Finite\Exception\StateException
+     * @throws \Finite\Exception\TransitionException
      */
     public function setUp(): void
     {
         $this->accessor = $this->createMock(StateAccessorInterface::class);
+
         $statefulMock = $this->createMock(StatefulInterface::class);
+
         $this->accessor->expects($this->at(0))
             ->method('getState')
             ->willReturn('s1')
@@ -38,20 +43,24 @@ class SecurityAwareStateMachineTest extends TestCase
         $this->object->initialize();
     }
 
+    /**
+     * @throws \Finite\Exception\TransitionException
+     */
     public function testCan(): void
     {
         $securityMock = $this->createMock(AuthorizationCheckerInterface::class);
+
         $this->object->setSecurityContext($securityMock);
 
-        $that = $this;
         $stateful = $this->object->getObject();
-        $addIsGrandedExpectation = static function ($return, $transition) use ($that, $securityMock, $stateful) {
+
+        $addIsGrandedExpectation = function ($return, $transition) use ($securityMock, $stateful) {
             static $at = 0;
 
             $securityMock
-                ->expects($that->at($at++))
+                ->expects($this->at($at++))
                 ->method('isGranted')
-                ->with(...[$transition, $stateful])
+                ->with($transition, $stateful)
                 ->willReturn($return)
             ;
         };

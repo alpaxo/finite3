@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Test\Acceptance;
 
 use Finite\Loader\ArrayLoader;
 use Finite\StateMachine\StateMachine;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
@@ -12,27 +15,21 @@ use stdClass;
  */
 class CallbacksTest extends TestCase
 {
-    /**
-     * @var StateMachine
-     */
-    protected $stateMachine;
+    protected StateMachine $stateMachine;
+
+    protected StateMachine $alternativeStateMachine;
+
+    protected MockObject $callbacksMock;
+
+    protected stdClass $object;
+
+    protected stdClass $alternativeObject;
 
     /**
-     * @var StateMachine
-     */
-    protected $alternativeStateMachine;
-
-    /**
-     * @var \PHPUnit\Framework\MockObject\MockObject
-     */
-    protected $callbacksMock;
-
-    protected $object;
-
-    protected $alternativeObject;
-
-    /**
+     * @throws \Finite\Exception\NoSuchPropertyException
      * @throws \Finite\Exception\ObjectException
+     * @throws \Finite\Exception\StateException
+     * @throws \Finite\Exception\TransitionException
      */
     protected function setUp(): void
     {
@@ -116,9 +113,11 @@ class CallbacksTest extends TestCase
     }
 
     /**
+     * @throws \Finite\Exception\NoSuchPropertyException
      * @throws \Finite\Exception\StateException
+     * @throws \Finite\Exception\TransitionException
      */
-    public function test()
+    public function test(): void
     {
         $this->callbacksMock->expects($this->once())->method('afterItWasProposed');
         $this->callbacksMock->expects($this->exactly(2))->method('afterItWasProposedOrReviewed');

@@ -1,33 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite;
 
 /**
- * Interface that all class that have properties must implements
+ * Interface that all class that have properties must implement
  *
- * @author
+ * @author Yohan Giarelli <yohan@frequence-web.fr>
  */
 interface PropertiesAwareInterface
 {
-    /**
-     * @param string $property
-     *
-     * @return bool
-     */
-    public function has($property): bool;
+    public function has(string $property): bool;
 
-    /**
-     * @param string $property
-     * @param mixed  $default
-     *
-     * @return mixed
-     */
-    public function get($property, $default = null);
+    public function get(string $property, mixed $default = null): mixed;
 
     /**
      * Returns optional state properties.
-     *
-     * @return array
      */
     public function getProperties(): array;
 }

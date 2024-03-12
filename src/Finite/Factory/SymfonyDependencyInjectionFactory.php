@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Factory;
 
 use Finite\Exception\FactoryException;
@@ -13,22 +15,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class SymfonyDependencyInjectionFactory extends AbstractFactory
 {
-    /**
-     * @var ContainerInterface
-     */
-    protected $container;
+    protected ContainerInterface $container;
+
+    protected string $key;
 
     /**
-     * @var string
-     */
-    protected $key;
-
-    /**
-     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
-     * @param string                                                    $key
      * @throws \Finite\Exception\FactoryException
      */
-    public function __construct(ContainerInterface $container, $key)
+    public function __construct(ContainerInterface $container, string $key)
     {
         $this->container = $container;
         $this->key = $key;

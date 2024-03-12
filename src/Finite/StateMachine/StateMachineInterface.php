@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\StateMachine;
 
 use Finite\State\Accessor\StateAccessorInterface;
@@ -21,57 +23,35 @@ interface StateMachineInterface
 
     /**
      * Apply a transition.
-     *
-     * @param string $transitionName
-     * @param array  $parameters
-     *
-     * @return mixed
      */
-    public function apply($transitionName, array $parameters = []);
+    public function apply(string $transitionName, array $parameters = []): mixed;
 
     /**
      * Returns if the transition is applicable.
-     *
-     * @param string|TransitionInterface $transition
-     * @param array                      $parameters
-     *
-     * @return bool
      */
-    public function can($transition, array $parameters = []): bool;
+    public function can(TransitionInterface|string $transition, array $parameters = []): bool;
 
     /**
-     * @param string|StateInterface $state
+     * Add a state
      */
-    public function addState($state);
+    public function addState(string|StateInterface $state);
 
     /**
-     * @param string|TransitionInterface $transition
-     * @param string|null                $initialState
-     * @param string|null                $finalState
-     *
      * @throws \InvalidArgumentException
      */
-    public function addTransition($transition, $initialState = null, $finalState = null);
+    public function addTransition(TransitionInterface|string $transition, string $initialState = null, string $finalState = null);
 
     /**
      * Returns a transition by its name.
      *
-     * @param string $name
-     *
-     * @return TransitionInterface
-     *
      * @throws \Finite\Exception\TransitionException
      */
-    public function getTransition($name): TransitionInterface;
+    public function getTransition(string $name): TransitionInterface;
 
     /**
-     * @param string $name
-     *
-     * @return StateInterface
-     *
      * @throws \Finite\Exception\TransitionException
      */
-    public function getState($name): StateInterface;
+    public function getState(string $name): StateInterface;
 
     /**
      * Returns an array containing all the transitions names.
@@ -87,54 +67,27 @@ interface StateMachineInterface
      */
     public function getStates(): array;
 
-    /**
-     * @param object $object
-     */
-    public function setObject($object);
+    public function setObject(object $object);
 
-    /**
-     * @return object
-     */
-    public function getObject();
+    public function getObject(): ?object;
 
-    /**
-     * @return StateInterface
-     */
     public function getCurrentState(): StateInterface;
 
-    /**
-     * @return \Symfony\Component\EventDispatcher\EventDispatcherInterface
-     */
+    public function setDispatcher(EventDispatcherInterface $dispatcher): void;
+
     public function getDispatcher(): EventDispatcherInterface;
 
-    /**
-     * @param StateAccessorInterface $stateAccessor
-     */
     public function setStateAccessor(StateAccessorInterface $stateAccessor);
 
-    /**
-     * @return bool
-     */
     public function hasStateAccessor(): bool;
 
-    /**
-     * @param string $graph
-     */
-    public function setGraph($graph);
+    public function setGraph(string $graph);
 
-    /**
-     * @return string|null
-     */
     public function getGraph(): ?string;
 
     /**
      * Find a state which have a given property, with an optional given value.
      * It is useful for looking for objects having a given property in database for example.
-     *
-     * @param string $property
-     * @param mixed  $value
-     *
-     * @return array
      */
-    public function findStateWithProperty($property, $value = null): array;
+    public function findStateWithProperty(string $property, mixed $value = null): array;
 }

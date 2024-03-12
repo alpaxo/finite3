@@ -13,39 +13,32 @@ use Finite\StateMachine\StateMachineInterface;
  */
 class CallbackSpecification implements CallbackSpecificationInterface
 {
-    /**
-     * @var array
-     */
-    private $specs = array();
+    private array $specs = [];
 
-    /**
-     * @var StateMachineInterface
-     */
-    private $stateMachine;
+    private StateMachineInterface $stateMachine;
 
-    /**
-     * @param StateMachineInterface $sm
-     * @param array                 $from
-     * @param array                 $to
-     * @param array                 $on
-     */
     public function __construct(StateMachineInterface $sm, array $from, array $to, array $on)
     {
         $this->stateMachine = $sm;
 
-        $isExclusion = function ($str) { return 0 === strpos($str, '-'); };
-        $removeDash = function ($str) { return substr($str, 1); };
+        $isExclusion = static function ($str) {
+            return str_starts_with($str, '-');
+        };
 
-        foreach (array('from', 'to', 'on') as $clause) {
+        $removeDash = static function ($str) {
+            return substr($str, 1);
+        };
+
+        foreach (compact('from', 'to', 'on') as $clause => $arg) {
             $excludedClause = 'excluded_'.$clause;
 
-            $this->specs[$excludedClause] = array_filter(${$clause}, $isExclusion);
-            $this->specs[$clause] = array_diff(${$clause}, $this->specs[$excludedClause]);
+            $this->specs[$excludedClause] = array_filter($arg, $isExclusion);
+            $this->specs[$clause] = array_diff($arg, $this->specs[$excludedClause]);
             $this->specs[$excludedClause] = array_map($removeDash, $this->specs[$excludedClause]);
 
             // For compatibility with old CallbackHandler.
             // To be removed in 2.0
-            if (in_array(CallbackHandler::ALL, $this->specs[$clause])) {
+            if (in_array(CallbackHandler::ALL, $this->specs[$clause], true)) {
                 $this->specs[$clause] = array();
             }
         }
@@ -54,7 +47,7 @@ class CallbackSpecification implements CallbackSpecificationInterface
     /**
      * {@inheritdoc}
      */
-    public function isSatisfiedBy(TransitionEvent $event)
+    public function isSatisfiedBy(TransitionEvent $event): bool
     {
         return
             $event->getStateMachine() === $this->stateMachine &&
@@ -63,18 +56,12 @@ class CallbackSpecification implements CallbackSpecificationInterface
             $this->supportsClause('on', $event->getTransition()->getName());
     }
 
-    /**
-     * @param string $clause
-     * @param string $property
-     *
-     * @return bool
-     */
-    private function supportsClause($clause, $property)
+    private function supportsClause(string $clause, string $property): bool
     {
         $excludedClause = 'excluded_'.$clause;
 
         return
-            (0 === count($this->specs[$clause]) || in_array($property, $this->specs[$clause])) &&
-            (0 === count($this->specs[$excludedClause]) || !in_array($property, $this->specs[$excludedClause]));
+            (0 === count($this->specs[$clause]) || in_array($property, $this->specs[$clause], true)) &&
+            (0 === count($this->specs[$excludedClause]) || !in_array($property, $this->specs[$excludedClause], true));
     }
 }

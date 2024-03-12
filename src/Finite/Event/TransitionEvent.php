@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Event;
 
 use Finite\State\StateInterface;
@@ -14,37 +16,22 @@ use Finite\Transition\TransitionInterface;
  */
 class TransitionEvent extends StateMachineEvent
 {
-    /**
-     * @var TransitionInterface
-     */
-    protected $transition;
+    protected TransitionInterface $transition;
+
+    protected bool $transitionRejected = false;
+
+    protected StateInterface $initialState;
+
+    protected array $properties;
 
     /**
-     * @var bool
-     */
-    protected $transitionRejected = false;
-
-    /**
-     * @var StateInterface
-     */
-    protected $initialState;
-
-    /**
-     * @var array
-     */
-    protected $properties;
-
-    /**
-     * @param StateInterface      $initialState
-     * @param TransitionInterface $transition
-     * @param StateMachine        $stateMachine
-     * @param array               $properties
+     * @throws \Finite\Exception\TransitionException
      */
     public function __construct(
         StateInterface $initialState,
         TransitionInterface $transition,
         StateMachine $stateMachine,
-        array $properties = array()
+        array $properties = []
     ) {
         $this->transition = $transition;
         $this->initialState = $initialState;
@@ -57,60 +44,37 @@ class TransitionEvent extends StateMachineEvent
         parent::__construct($stateMachine);
     }
 
-    /**
-     * @return TransitionInterface
-     */
-    public function getTransition()
+    public function getTransition(): TransitionInterface
     {
         return $this->transition;
     }
 
-    /**
-     * @return bool
-     */
-    public function isRejected()
+    public function isRejected(): bool
     {
         return $this->transitionRejected;
     }
 
-    public function reject()
+    public function reject(): void
     {
         $this->transitionRejected = true;
     }
 
-    /**
-     * @return StateInterface
-     */
-    public function getInitialState()
+    public function getInitialState(): StateInterface
     {
         return $this->initialState;
     }
 
-    /**
-     * @param string $property
-     *
-     * @return bool
-     */
-    public function has($property)
+    public function has(string $property): bool
     {
         return array_key_exists($property, $this->properties);
     }
 
-    /**
-     * @param string $property
-     * @param mixed  $default
-     *
-     * @return mixed
-     */
-    public function get($property, $default = null)
+    public function get(string $property, mixed $default = null): mixed
     {
         return $this->has($property) ? $this->properties[$property] : $default;
     }
 
-    /**
-     * @return array
-     */
-    public function getProperties()
+    public function getProperties(): array
     {
         return $this->properties;
     }

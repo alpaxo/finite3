@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Transition;
 
+use Closure;
 use Finite\Exception\TransitionException;
 use Finite\State\StateInterface;
 use Finite\StateMachine\StateMachineInterface;
@@ -19,43 +22,21 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class Transition implements PropertiesAwareTransitionInterface
 {
-    /**
-     * @var array
-     */
-    protected $initialStates;
+    protected array $initialStates;
 
-    /*
-     * @var string
-     */
-    protected $state;
+    protected string $state;
 
-    /**
-     * @var string
-     */
-    protected $name;
+    protected string $name;
 
-    /**
-     * @var callable
-     */
-    protected $guard;
+    protected Closure|array|null $guard;
 
-    /**
-     * @var OptionsResolver
-     */
-    protected $propertiesOptionsResolver;
+    protected OptionsResolver $propertiesOptionsResolver;
 
-    /**
-     * @param string          $name
-     * @param string|array    $initialStates
-     * @param string          $state
-     * @param callable|null   $guard
-     * @param OptionsResolver $propertiesOptionsResolver
-     */
     public function __construct(
-        $name,
-        $initialStates,
-        $state,
-        $guard = null,
+        string $name,
+        array|string $initialStates,
+        string $state,
+        Closure|array|null $guard = null,
         OptionsResolver $propertiesOptionsResolver = null
     ) {
         if (null !== $guard && !is_callable($guard)) {
@@ -69,10 +50,7 @@ class Transition implements PropertiesAwareTransitionInterface
         $this->propertiesOptionsResolver = $propertiesOptionsResolver ?: new OptionsResolver();
     }
 
-    /**
-     * @param string|StateInterface $state
-     */
-    public function addInitialState($state): void
+    public function addInitialState(StateInterface|string $state): void
     {
         if ($state instanceof StateInterface) {
             $state = $state->getName();
@@ -100,8 +78,9 @@ class Transition implements PropertiesAwareTransitionInterface
     /**
      * {@inheritdoc}
      */
-    public function process(StateMachineInterface $stateMachine)
+    public function process(StateMachineInterface $stateMachine): mixed
     {
+        return null;
     }
 
     /**
@@ -145,7 +124,7 @@ class Transition implements PropertiesAwareTransitionInterface
     /**
      * {@inheritDoc}
      */
-    public function has($property): bool
+    public function has(string $property): bool
     {
         return array_key_exists($property, $this->getProperties());
     }
@@ -153,7 +132,7 @@ class Transition implements PropertiesAwareTransitionInterface
     /**
      * {@inheritDoc}
      */
-    public function get($property, $default = null)
+    public function get(string $property, mixed $default = null): mixed
     {
         $properties = $this->getProperties();
 

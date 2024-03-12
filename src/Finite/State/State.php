@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\State;
 
 use Finite\Transition\TransitionInterface;
@@ -13,31 +15,13 @@ use Finite\Transition\TransitionInterface;
  */
 class State implements StateInterface
 {
-    /**
-     * The state type.
-     *
-     * @var int
-     */
-    protected $type;
+    protected string $type;
 
-    /**
-     * The transition name.
-     *
-     * @var array
-     */
-    protected $transitions;
+    protected array $transitions;
 
-    /**
-     * The state name.
-     *
-     * @var string
-     */
-    protected $name;
+    protected string $name;
 
-    /**
-     * @var array
-     */
-    protected $properties;
+    protected array $properties;
 
     public function __construct($name, $type = self::TYPE_NORMAL, array $transitions = [], array $properties = [])
     {
@@ -114,7 +98,7 @@ class State implements StateInterface
      *
      * @deprecated Deprecated since version 1.0.0-BETA2. Use {@link StateMachine::can($transition)} instead.
      */
-    public function can($transition): bool
+    public function can(TransitionInterface|string $transition): bool
     {
         if ($transition instanceof TransitionInterface) {
             $transition = $transition->getName();
@@ -126,7 +110,7 @@ class State implements StateInterface
     /**
      * {@inheritdoc}
      */
-    public function has($property): bool
+    public function has(string $property): bool
     {
         return array_key_exists($property, $this->properties);
     }
@@ -134,7 +118,7 @@ class State implements StateInterface
     /**
      * {@inheritdoc}
      */
-    public function get($property, $default = null)
+    public function get(string $property, mixed $default = null): mixed
     {
         return $this->has($property) ? $this->properties[$property] : $default;
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Finite\Loader;
 
 use Finite\StateMachine\StateMachineInterface;
@@ -13,18 +15,11 @@ interface LoaderInterface
 {
     /**
      * Loads a state machine.
-     *
-     * @param \Finite\StateMachine\StateMachineInterface $stateMachine
      */
     public function load(StateMachineInterface $stateMachine): void;
 
     /**
      * Returns if this loader supports $object for $graph.
-     *
-     * @param object $object
-     * @param string $graph
-     *
-     * @return bool
      */
-    public function supports($object, $graph = 'default'): bool;
+    public function supports(object $object, string $graph = 'default'): bool;
 }

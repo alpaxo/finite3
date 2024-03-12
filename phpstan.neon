@@ -1,0 +1,16 @@
+includes:
+
+parameters:
+    paths:
+        - src/
+
+    # Level 9 is the highest level
+    level: 1
+    treatPhpDocTypesAsCertain: false
+#    ignoreErrors:
+#        - '#PHPDoc tag @var#'
+#
+#    excludePaths:
+#        - ./*/*/FileToBeExcluded.php
+#
+#    checkMissingIterableValueType: false
