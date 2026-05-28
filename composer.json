@@ -1,6 +1,6 @@
 {
   "name": "alpaxo/finite3",
-  "description": "A simple PHP8.1+ Finite State Machine",
+  "description": "A simple PHP8.4+ Finite State Machine",
   "keywords": [
     "statemachine",
     "workflow",
@@ -24,11 +24,11 @@
     }
   ],
   "require": {
-    "php": "^8.2",
-    "symfony/symfony": "^7.0",
-    "symfony/property-access": "^7.0",
-    "symfony/options-resolver": "^7.0",
-    "symfony/event-dispatcher": "^7.0"
+    "php": "^8.4",
+    "symfony/symfony": "^8.0",
+    "symfony/property-access": "^8.0",
+    "symfony/options-resolver": "^8.0",
+    "symfony/event-dispatcher": "^8.0"
   },
   "require-dev": {
     "pimple/pimple": "^3.3",
@@ -50,7 +50,7 @@
   "config": {
     "bin-dir": "bin",
     "platform": {
-      "php": "8.2.0"
+      "php": "8.4.0"
     }
   },
   "extra": {

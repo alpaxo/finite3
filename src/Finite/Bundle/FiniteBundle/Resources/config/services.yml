@@ -1,0 +1,52 @@
+parameters:
+  finite.state_machine.class: 'Finite\StateMachine\StateMachine'
+  finite.array_loader.class: 'Finite\Loader\ArrayLoader'
+  finite.factory.class: 'Finite\Factory\SymfonyDependencyInjectionFactory'
+  finite.context.class: 'Finite\Context'
+  finite.twig_extension.class: 'Finite\Extension\Twig\FiniteExtension'
+  finite.callback.handler.class: 'Finite\Event\CallbackHandler'
+  finite.callback.builder.factory.class: 'Finite\Event\Callback\CallbackBuilderFactory'
+
+services:
+  finite.callback.handler:
+    class: '%finite.callback.handler.class%'
+    arguments:
+      - '@event_dispatcher'
+
+  finite.callback.builder.factory:
+    class: '%finite.callback.builder.factory.class%'
+
+  finite.array_loader:
+    class: '%finite.array_loader.class%'
+    public: false
+    arguments:
+      - [ ]
+      - '@finite.callback.handler'
+      - '@finite.callback.builder.factory'
+
+  finite.state_machine:
+    class: '%finite.state_machine.class%'
+    public: true
+    calls:
+      - [ setDispatcher, [ '@event_dispatcher' ] ]
+
+  finite.factory:
+    class: '%finite.factory.class%'
+    public: true
+    arguments:
+      - '@service_container'
+      - 'finite.state_machine'
+
+  finite.context:
+    class: '%finite.context.class%'
+    public: true
+    arguments:
+      - '@finite.factory'
+
+  finite.twig_extension:
+    class: '%finite.twig_extension.class%'
+    public: false
+    arguments:
+      - '@finite.context'
+    tags:
+      - { name: 'twig.extension' }

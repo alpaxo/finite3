@@ -63,7 +63,6 @@ class PropertyPathStateAccessorTest extends TestCase
             ->expects($this->at(0))
             ->method('setValue')
             ->with($stateful, 'bar', 'foo')
-            ->willReturn('foo')
         ;
 
         $object->setState($stateful, 'foo');
@@ -74,7 +73,6 @@ class PropertyPathStateAccessorTest extends TestCase
             ->expects($this->at(0))
             ->method('setValue')
             ->with($stateful, 'finiteState')
-            ->willReturn('foo')
         ;
 
         $object->setState($stateful, 'foo');
